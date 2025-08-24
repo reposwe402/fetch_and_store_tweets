@@ -61,7 +61,7 @@ After creating the App click on **Keys and tokens** option you will observe Cons
 
 1. Save the script in the local machine.
 
-2. Update the API and Access token Keys in the Python script which generated in step8
+2. Update the API and Access token Keys in the `config.py` file.
 
 3. Open a terminal/command prompt and change directory location to the folder where your script is located and run the below commands
 
@@ -74,7 +74,7 @@ After creating the App click on **Keys and tokens** option you will observe Cons
     2. To execute the script run the following command
 
         ```python
-        python fetch_store_tweet.py 
+        python main.py 
         ```
 
     After successful execution of the script you should observe the below output in command prompt/terminal as well as one `.csv` file with the required number of tweets will be generated.

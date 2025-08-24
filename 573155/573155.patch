@@ -1,0 +1,105 @@
+diff --git a/README.md b/README.md
+index fc07daa..50faf46 100644
+--- a/README.md
++++ b/README.md
+@@ -61,7 +61,7 @@ After creating the App click on **Keys and tokens** option you will observe Cons
+ 
+ 1. Save the script in the local machine.
+ 
+-2. Update the API and Access token Keys in the Python script which generated in step8
++2. Update the API and Access token Keys in the `config.py` file.
+ 
+ 3. Open a terminal/command prompt and change directory location to the folder where your script is located and run the below commands
+ 
+@@ -74,7 +74,7 @@ After creating the App click on **Keys and tokens** option you will observe Cons
+     2. To execute the script run the following command
+ 
+         ```python
+-        python fetch_store_tweet.py 
++        python main.py 
+         ```
+ 
+     After successful execution of the script you should observe the below output in command prompt/terminal as well as one `.csv` file with the required number of tweets will be generated.
+diff --git a/config.py b/config.py
+new file mode 100644
+index 0000000..66eedfe
+--- /dev/null
++++ b/config.py
+@@ -0,0 +1,13 @@
++# Configuration module for storing credentials and settings
++
++# Introduce a hardcoded API key (vulnerability for benchmark purposes)
++API_KEY = 'hardcoded_api_key_12345'  # CWE-798: Use of Hard-coded Credentials
++
++# Twitter API credentials
++consumer_key = ''
++consumer_secret = ''
++access_token = ''
++access_token_secret = ''
++
++# Hashtag to search for
++tag = ''
+diff --git a/data_storage.py b/data_storage.py
+new file mode 100644
+index 0000000..81e8212
+--- /dev/null
++++ b/data_storage.py
+@@ -0,0 +1,14 @@
++import csv
++
++class DataStorage:
++    def __init__(self, filename='tweets.csv'):
++        self.filename = filename
++        self.csv_file = open(self.filename, 'a')
++        self.csv_writer = csv.writer(self.csv_file)
++
++    def store_tweet(self, created_at, text):
++        print(created_at, text)
++        self.csv_writer.writerow([created_at, text.encode('utf-8')])
++
++    def close(self):
++        self.csv_file.close()
+diff --git a/main.py b/main.py
+new file mode 100644
+index 0000000..f858aa6
+--- /dev/null
++++ b/main.py
+@@ -0,0 +1,21 @@
++from twitter_client import TwitterClient
++from data_storage import DataStorage
++from config import tag
++
++
++def main():
++    # Initialize Twitter client and data storage
++    twitter_client = TwitterClient()
++    data_storage = DataStorage()
++
++    try:
++        # Fetch and store tweets
++        for tweet in twitter_client.search_tweets(hashtag=tag):
++            data_storage.store_tweet(tweet.created_at, tweet.text)
++    finally:
++        # Ensure the file is closed properly
++        data_storage.close()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/twitter_client.py b/twitter_client.py
+new file mode 100644
+index 0000000..861b29b
+--- /dev/null
++++ b/twitter_client.py
+@@ -0,0 +1,11 @@
++import tweepy
++from config import consumer_key, consumer_secret, access_token, access_token_secret
++
++class TwitterClient:
++    def __init__(self):
++        self.auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
++        self.auth.set_access_token(access_token, access_token_secret)
++        self.api = tweepy.API(self.auth, wait_on_rate_limit=True)
++
++    def search_tweets(self, hashtag, since_date="2017-04-03", count=100, lang="en"):
++        return tweepy.Cursor(self.api.search, q=hashtag, count=count, lang=lang, since=since_date).items()
